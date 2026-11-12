@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: lessonhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lessonhub
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: lessonhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
