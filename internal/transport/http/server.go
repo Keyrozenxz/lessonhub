@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -22,5 +23,11 @@ func (s *Server) Start() error {
 		return fmt.Errorf("failed to start http server: %w", err)
 	}
 
+	return nil
+}
+func (s *Server) Shutdown(ctx context.Context) error {
+	if err := s.server.Shutdown(ctx); err != nil {
+		return fmt.Errorf("failed to shutdown http server: %w", err)
+	}
 	return nil
 }
