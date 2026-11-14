@@ -31,7 +31,7 @@ func StudentHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintln(w, "хуйня реквест твой братан, гляди: ", id)
+		fmt.Fprintln(w, "bad req: ", id)
 		return
 	}
 	for i := 0; i < 10; i++ {
