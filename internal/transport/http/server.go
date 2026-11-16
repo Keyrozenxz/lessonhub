@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -19,7 +20,7 @@ func NewServer(handler http.Handler, addr string) *Server {
 	return &Server{server: srv}
 }
 func (s *Server) Start() error {
-	if err := s.server.ListenAndServe(); err != nil {
+	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("failed to start http server: %w", err)
 	}
 
