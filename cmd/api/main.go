@@ -38,14 +38,20 @@ func run(logger *slog.Logger) error {
 	router := httptransport.NewRouter()
 	server := httptransport.NewServer(router, addr)
 
+	serverErr := make(chan error, 1)
 	go func() {
 		logger.Info("starting http server", "addr", addr)
 		if err := server.Start(); err != nil {
-			panic(err)
+			serverErr <- err
 		}
 	}()
 
-	<-ctx.Done()
+	select {
+	case v := <-serverErr:
+		return fmt.Errorf("run http server: %w", v)
+	case <-ctx.Done():
+		logger.Info("shutdown signal received")
+	}
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownCancel()
