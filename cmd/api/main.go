@@ -15,7 +15,7 @@ import (
 )
 
 func run(logger *slog.Logger) error {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	signalCtx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	cfg, err := config.Load()
@@ -23,7 +23,7 @@ func run(logger *slog.Logger) error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	connectCtx, connectCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	connectCtx, connectCancel := context.WithTimeout(signalCtx, 5*time.Second)
 
 	pool, err := database.NewPool(connectCtx, cfg)
 	connectCancel()
@@ -47,10 +47,11 @@ func run(logger *slog.Logger) error {
 	}()
 
 	select {
-	case v := <-serverErr:
-		return fmt.Errorf("run http server: %w", v)
-	case <-ctx.Done():
+	case err := <-serverErr:
+		return fmt.Errorf("run http server: %w", err)
+	case <-signalCtx.Done():
 		logger.Info("shutdown signal received")
+		stop()
 	}
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
