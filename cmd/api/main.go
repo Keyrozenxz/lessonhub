@@ -25,22 +25,20 @@ func run(logger *slog.Logger) error {
 
 	connectCtx, connectCancel := context.WithTimeout(signalCtx, 5*time.Second)
 
-	pool, err := database.NewPool(connectCtx, cfg)
+	pool, err := database.NewPool(connectCtx, cfg.DB)
 	connectCancel()
 	if err != nil {
 		return fmt.Errorf("create database pool: %w", err)
 	}
 	defer pool.Close()
-	logger.Info("connected to database", "host", cfg.DBHost, "port", cfg.DBPort, "name", cfg.DBName)
-
-	addr := ":8080"
+	logger.Info("connected to database", "host", cfg.DB.Host, "port", cfg.DB.Port, "name", cfg.DB.Name)
 
 	router := httptransport.NewRouter()
-	server := httptransport.NewServer(router, addr)
+	server := httptransport.NewServer(router, cfg.HTTP.Addr)
 
 	serverErr := make(chan error, 1)
 	go func() {
-		logger.Info("starting http server", "addr", addr)
+		logger.Info("starting http server", "addr", cfg.HTTP.Addr)
 		if err := server.Start(); err != nil {
 			serverErr <- err
 		}
