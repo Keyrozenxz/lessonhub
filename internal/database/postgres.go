@@ -11,16 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewPool(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
-	if cfg == nil {
-		return nil, fmt.Errorf("config cannot be nil")
-	}
-
+func NewPool(ctx context.Context, dbCfg config.DBConfig) (*pgxpool.Pool, error) {
 	u := url.URL{
 		Scheme: "postgres",
-		User:   url.UserPassword(cfg.DBUser, cfg.DBPassword),
-		Host:   net.JoinHostPort(cfg.DBHost, strconv.Itoa(cfg.DBPort)),
-		Path:   "/" + cfg.DBName,
+		User:   url.UserPassword(dbCfg.User, dbCfg.Password),
+		Host:   net.JoinHostPort(dbCfg.Host, strconv.Itoa(dbCfg.Port)),
+		Path:   "/" + dbCfg.Name,
 	}
 
 	connString := u.String()
